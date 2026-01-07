@@ -1,0 +1,46 @@
+version: '3.8'
+
+services:
+  glpi:
+    image: glpi/glpi:latest
+    ports:
+      - "80:80"
+    volumes:
+      - data-glpi:/var/www/html/glpi/files
+      - data-glpi-config:/var/www/html/glpi/config
+      - data-glpi-marketplace:/var/www/html/glpi/marketplace
+    environment:
+      # Database connection details
+      - DB_HOST=db
+      - DB_NAME=glpidb
+      - DB_USER=glpi_user
+      - DB_PASS=glpi_password
+      # Optional: disable auto-install if you prefer manual setup
+      # - GLPI_SKIP_AUTOINSTALL=true 
+    networks:
+      - glpi-network
+    restart: unless-stopped
+
+  db:
+    image: mariadb:10.7
+    volumes:
+      - data-db:/var/lib/mysql
+    environment:
+      # Database credentials
+      - MARIADB_ROOT_PASSWORD=db_root_password
+      - MARIADB_DATABASE=glpidb
+      - MARIADB_USER=glpi_user
+      - MARIADB_PASSWORD=glpi_password
+    networks:
+      - glpi-network
+    restart: unless-stopped
+
+volumes:
+  data-glpi:
+  data-glpi-config:
+  data-glpi-marketplace:
+  data-db:
+
+networks:
+  glpi-network:
+    driver: bridge
